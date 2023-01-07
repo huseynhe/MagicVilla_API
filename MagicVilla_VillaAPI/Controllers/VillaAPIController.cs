@@ -1,9 +1,11 @@
 ﻿using MagicVilla_VillaAPI.Data;
+using MagicVilla_VillaAPI.LoggingOperation;
 using MagicVilla_VillaAPI.Models;
 using MagicVilla_VillaAPI.Models.Dto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,11 +17,20 @@ namespace MagicVilla_VillaAPI.Controllers
     [ApiController]
     public class VillaAPIController : ControllerBase
     {
+        private readonly ILogger<VillaAPIController> _logger;
+        private readonly ILogging _logging;
+
+        public VillaAPIController(ILogger<VillaAPIController> logger, ILogging logging)
+        {
+            _logger = logger;
+            _logging = logging;
+        }
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<VillaDTO>))]
         public ActionResult<IEnumerable<VillaDTO>> GetVillas()
         {
-
+            _logger.LogInformation("Get villas method called");
             return Ok(VillaStore.villaList);
 
         }
@@ -31,6 +42,7 @@ namespace MagicVilla_VillaAPI.Controllers
         {
             if (id == 0)
             {
+                _logger.LogError("Get Villa Error with id "+id);
                 return BadRequest();
             }
             var villa = VillaStore.villaList.FirstOrDefault(x => x.Id == id);
@@ -61,6 +73,7 @@ namespace MagicVilla_VillaAPI.Controllers
             }
             if (villaDTO.Id > 0)
             {
+                _logging.Log($"{villaDTO.Id} sifirdan boyuk oldugu ucun kayd yaradilamaz", "error");
                 return StatusCode(StatusCodes.Status500InternalServerError);
 
             }
@@ -108,7 +121,7 @@ namespace MagicVilla_VillaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpPatch("{id:int}", Name = "UpdatePartialVilla")]
-        public IActionResult UpdatePartialVilla(int id,JsonPatchDocument<VillaDTO> patchDto)
+        public ActionResult UpdatePartialVilla(int id,JsonPatchDocument<VillaDTO> patchDto)
         {
             if (patchDto == null || id ==0)
             {
@@ -124,6 +137,7 @@ namespace MagicVilla_VillaAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
+            return NoContent();
         }
     }
 }
