@@ -1,5 +1,7 @@
 using MagicVilla_VillaAPI.Data;
 using MagicVilla_VillaAPI.LoggingOperation;
+using MagicVilla_VillaAPI.Repository;
+using MagicVilla_VillaAPI.Repository.IRepository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -41,6 +43,7 @@ namespace MagicVilla_VillaAPI
             });
             services.AddControllers().AddNewtonsoftJson();
             services.AddSingleton<ILogging, LoggingV2>();
+            services.AddScoped<IUserRepository, UserRepository>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "MagicVilla_VillaAPI", Version = "v1" });
